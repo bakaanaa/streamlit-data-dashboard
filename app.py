@@ -110,34 +110,74 @@ def chartsection(filtered_df):
     numeric_cols = filtered_df.select_dtypes(include=['float64', 'int64']).columns.tolist()
     category_cols= filtered_df.select_dtypes(include=['object', 'category']).columns.tolist()
 
-    if chart_type in ["Line Chart", "Scatter plot","Boxplot Chart"]:
+    if chart_type in ["Line Chart", "Scatter plot"]:
         if len(numeric_cols) < 2:
             st.warning("Cần ít nhất 2 cột số để vẽ biểu đồ.")
             return
+        else:
+            x_axis = st.selectbox("Chọn trục X", numeric_cols,key="x_axis")
+            y_axis = st.selectbox("Chọn trục Y", [col for col in numeric_cols if col != x_axis],key="y_axis")
+            if chart_type == "Line Chart":
+                st.write("Bạn đã chọn biểu đồ:",chart_type)
+                fig,ax=plt.subplots(figsize=(5, 5))
+                ax.plot(filtered_df[x_axis],filtered_df[y_axis])
+                plt.xlabel(str(x_axis))
+                plt.ylabel(str(y_axis))
+                st.pyplot(fig)
         
-        x_axis = st.selectbox("Chọn trục X", numeric_cols)
-        y_axis = st.selectbox("Chọn trục Y", [col for col in numeric_cols if col != x_axis])
+            elif chart_type=="Scatter plot":
+                st.write("Bạn đã chọn biểu đồ:",chart_type)
+                fig=plt.figure(figsize=(5,5))
+                plt.scatter(filtered_df[x_axis],filtered_df[y_axis])
+                plt.xlabel(str(x_axis))
+                plt.ylabel(y_axis)
+                st.pyplot(fig)
 
-        if chart_type == "Line Chart":
+    elif chart_type=="Boxplot Chart":
+        st.write("Bạn đã chọn biểu đồ:",chart_type)
+        fig=plt.figure(figsize=(5,5))
+        plt.boxplot([filtered_df[col] for col in numeric_cols],
+                    tick_labels=numeric_cols,
+                    flierprops={'marker': 'x'})
+        plt.xticks(rotation=45)
+        st.pyplot(fig)
+
+    elif chart_type in ["Bar Chart"]:
+        x_feature=filtered_df.columns.tolist()
+        if len(x_feature) < 2:
+            st.warning("Cần ít nhất 2 cột số để vẽ biểu đồ.")
+            return
+        else:
+            x_axis = st.selectbox("Chọn trục X", x_feature,key="x_features")
+            y_axis = st.selectbox("Chọn trục Y", [col for col in numeric_cols if col != x_axis],key="y_features")
+
+            if chart_type=="Bar Chart":
+                st.write("Bạn đã chọn biểu đồ:",chart_type)
+                fig,ax=plt.subplots(figsize=(5,5))
+                ax.bar(filtered_df[x_axis],filtered_df[y_axis])
+                plt.xlabel(str(x_axis))
+                plt.ylabel(str(y_axis))
+                st.pyplot(fig)
+    
+    elif chart_type in ["Pie Chart","Histogram"]:
+        x_feature=filtered_df.columns.tolist()
+        x_axis = st.selectbox("Chọn dữ liệu", x_feature,key="pie_hist")
+
+        if chart_type=="Histogram":
             st.write("Bạn đã chọn biểu đồ:",chart_type)
-            fig,ax=plt.subplots(figsize=(10, 5))
-            ax.plot(filtered_df[x_axis],filtered_df[y_axis])
+            fig,ax=plt.subplots(figsize=(5,5))
+            ax.hist(filtered_df[x_axis],bins=50)
             plt.xlabel(str(x_axis))
-            plt.ylabel(str(y_axis))
-            st.pyplot(fig)
-        
-        elif chart_type=="Scatter plot":
-            st.write("Bạn đã chọn biểu đồ:",chart_type)
-            fig=plt.figure(figsize=(5,5))
-            plt.scatter(filtered_df[x_axis],filtered_df[y_axis])
-            st.pyplot(fig)
-        elif chart_type=="Boxplot Chart":
-            st.write("Bạn đã chọn biểu đồ:",chart_type)
-            fig=plt.figure(figsize=(5,5))
-            plt.boxplot([filtered_df[col] for col in numeric_cols],tick_labels=numeric_cols)
-            plt.xticks(rotation=45)
             st.pyplot(fig)
 
+        # elif chart_type=="Pie Chart":
+        #     st.write("Bạn đã chọn biểu đồ:",chart_type)
+        #     st.selectbox("Chọn kiểu mean,sum,count",
+        #                  ("mea"))
+        #     fig,ax=plt.subplots(figsize=(5,5))
+        #     ax.pie(filtered_df[x_axis])
+        #     plt.xlabel(str(x_axis))
+        #     st.pyplot(fig)
 
 
 df = uploadfile()
